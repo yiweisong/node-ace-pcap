@@ -5,43 +5,47 @@ const HEADER = [0x55, 0x55];
 
 const MIN_ETH_COMMAND_LENGTH = 46;
 
-const instance = new EthernetPacketCapture({ network: 'en0' });
+const instance = new EthernetPacketCapture({ network: `\Device\NPF_{67F2BA6C-15AA-4E4F-9D78-4BF7DD4437E5}` });
 
 instance.on('data', (data) => {
     console.log(data);
 })
 
-instance.start()
+instance.start();
 
-instance.setFilter("(ether src 88:e9:fe:52:68:56 or ether dst 88:e9:fe:52:68:56)")
+//instance.setFilter('ether src 98:5f:d3:3c:ab:fd');
+
+const hostMAC = '98:5f:d3:3c:ab:fd'; //88:e9:fe:52:68:56
+
+instance.setFilter(`(ether src ${hostMAC} or ether dst ${hostMAC})`)
 
 const command = buildETHCommand(
     "ff:ff:ff:ff:ff:ff",
-    "88:e9:fe:52:68:56",
+    hostMAC,
     [0x01, 0xcc]
 )
 instance.send(command);
 
 setTimeout(() => {
-    instance.setFilter("ether dst 88:e9:fe:52:68:56")
+    instance.setFilter(`ether dst ${hostMAC}`)
     const command1 = buildETHCommand(
-        "88:e9:fe:52:68:56",
+        hostMAC,
         "ff:ff:ff:ff:ff:ff",
         [0x01, 0xcc]
     )
     instance.send(command1);
 }, 5 * 1000);
 
-setTimeout(() => {
-    instance.setFilter("ether src 88:e9:fe:52:68:56")
-    const command2 = buildETHCommand(
-        "ff:ff:ff:ff:ff:ff",
-        "88:e9:fe:52:68:56",
-        [0x01, 0xcc]
-    )
-    instance.send(command2);
+// setTimeout(() => {
+//     instance.setFilter(`ether src ${hostMAC}`)
+//     const command2 = buildETHCommand(
+//         "ff:ff:ff:ff:ff:ff",
+//         hostMAC,
+//         [0x01, 0xcc]
+//     )
+//     instance.send(command2);
 
-}, 10 * 1000);
+// }, 10 * 1000);
 
 
 function buildArray(length, defaultValue) {
