@@ -1,5 +1,5 @@
-#ifndef LIVE_DEVICE_CAPTURE_H
-#define LIVE_DEVICE_CAPTURE_H
+#ifndef ACE_PCAP_LIVE_DEVICE_CAPTURE_H
+#define ACE_PCAP_LIVE_DEVICE_CAPTURE_H
 
 #include <uv.h>
 #include <napi.h>
@@ -15,7 +15,7 @@ struct PacketEventData
 class LiveDeviceCapture : public Napi::ObjectWrap<LiveDeviceCapture>
 {
 public:
-    static void Init(Napi::Env env, Napi::Object exports);
+    static Napi::Object Init(Napi::Env env, Napi::Object exports);
     static void EmitPacket(u_char *user, const struct pcap_pkthdr *pkt_hdr, const u_char *pkt_data);
 #ifdef _WIN32
     static void cb_packets(uv_async_t *handle);
@@ -32,7 +32,8 @@ public:
 
 private:
     Napi::ThreadSafeFunction tsEmit_;
-    std::string network;
+    std::string iface;
+    std::string filter;
     pcap_t *pcap_handle = NULL;
     bool close();
     void cleanup();

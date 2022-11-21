@@ -3,7 +3,8 @@
       'target_name': 'ace-pcap',
       'sources': [
           'src/binding.cc',
-          'src/live_device_capture.cc'
+          'src/live_device_capture.cc',
+          'src/utils.cc'
       ],
       'include_dirs': ["<!@(node -p \"require('node-addon-api').include\")"],
       'dependencies': ["<!(node -p \"require('node-addon-api').gyp\")"],

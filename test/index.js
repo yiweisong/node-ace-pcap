@@ -1,11 +1,19 @@
-const { EthernetPacketCapture } = require('../dist/index');
+const { EthernetPacketCapture, GetNetworkInterface } = require('../dist/index');
 const { struct } = require('./struct');
 
 const HEADER = [0x55, 0x55];
 
 const MIN_ETH_COMMAND_LENGTH = 46;
 
-const instance = new EthernetPacketCapture({ network: `\Device\NPF_{67F2BA6C-15AA-4E4F-9D78-4BF7DD4437E5}` });
+const hostMAC = '88:e9:fe:52:68:56'; //98:5f:d3:3c:ab:fd
+
+const ip = '192.168.22.140'; //local ip
+
+const iface = GetNetworkInterface(ip);
+
+const filter = `ether src ${hostMAC}`;
+
+const instance = new EthernetPacketCapture({ iface, filter });
 
 instance.on('data', (data) => {
     console.log(data);
@@ -15,9 +23,7 @@ instance.start();
 
 //instance.setFilter('ether src 98:5f:d3:3c:ab:fd');
 
-const hostMAC = '98:5f:d3:3c:ab:fd'; //88:e9:fe:52:68:56
-
-instance.setFilter(`(ether src ${hostMAC} or ether dst ${hostMAC})`)
+//instance.setFilter(`(ether src ${hostMAC} or ether dst ${hostMAC})`)
 
 const command = buildETHCommand(
     "ff:ff:ff:ff:ff:ff",

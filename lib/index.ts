@@ -9,10 +9,15 @@ const LiveDeviceCapture = binding.LiveDeviceCapture
 
 inherits(LiveDeviceCapture, EventEmitter);
 
+export type CreateOptions = {
+  iface: string;
+  filter?: string;
+};
+
 export class EthernetPacketCapture extends EventEmitter {
   private binding;
 
-  constructor(options: any) {
+  constructor(options: CreateOptions) {
     super();
     this.binding = new LiveDeviceCapture(options);
     this.binding.on('data', (data: any) => {
@@ -32,3 +37,7 @@ export class EthernetPacketCapture extends EventEmitter {
     this.binding.send(data);
   }
 }
+
+export const GetNetworkInterface = function (ip: string) {
+  return binding.GetNetworkInterface(ip);
+} 

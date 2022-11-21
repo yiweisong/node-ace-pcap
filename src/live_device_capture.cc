@@ -4,7 +4,7 @@
 
 using namespace Napi;
 
-void LiveDeviceCapture::Init(Napi::Env env, Napi::Object exports)
+Napi::Object LiveDeviceCapture::Init(Napi::Env env, Napi::Object exports)
 {
     Napi::Function func = DefineClass(
         env,
@@ -16,6 +16,7 @@ void LiveDeviceCapture::Init(Napi::Env env, Napi::Object exports)
             InstanceMethod("send", &LiveDeviceCapture::SendPacket),
         });
     exports.Set("LiveDeviceCapture", func);
+    return exports;
 }
 
 LiveDeviceCapture::LiveDeviceCapture(const Napi::CallbackInfo &info) : ObjectWrap(info)
@@ -37,21 +38,30 @@ LiveDeviceCapture::LiveDeviceCapture(const Napi::CallbackInfo &info) : ObjectWra
     }
 
     Napi::Object options = info[0].As<Napi::Object>();
-    if (options.Has("network"))
+    if (options.Has("iface"))
     {
-        this->network = options.Get("network").As<Napi::String>().Utf8Value();
+        this->iface = options.Get("iface").As<Napi::String>().Utf8Value();
+    }
+
+    if (options.Has("filter"))
+    {
+        this->filter = options.Get("filter").As<Napi::String>().Utf8Value();
+    }
+    else
+    {
+        this->filter = "";
     }
 #ifdef _WIN32
     this->wait = nullptr;
-    this->handling_packets = false;
 #endif
+    this->handling_packets = false;
     this->closing = false;
 }
 
 #ifdef _WIN32
 void LiveDeviceCapture::cb_packets(uv_async_t *handle)
 {
-    LiveDeviceCapture *obj = (LiveDeviceCapture*)handle->data;
+    LiveDeviceCapture *obj = (LiveDeviceCapture *)handle->data;
     int packet_count;
 
     if (obj->closing)
@@ -62,10 +72,10 @@ void LiveDeviceCapture::cb_packets(uv_async_t *handle)
     do
     {
         packet_count = pcap_dispatch(obj->pcap_handle,
-                                      1,
-                                      LiveDeviceCapture::EmitPacket,
-                                      (u_char *)obj);
-     } while (packet_count > 0 && !obj->closing);
+                                     1,
+                                     LiveDeviceCapture::EmitPacket,
+                                     (u_char *)obj);
+    } while (packet_count > 0 && !obj->closing);
 
     obj->handling_packets = false;
     if (obj->closing)
@@ -73,10 +83,10 @@ void LiveDeviceCapture::cb_packets(uv_async_t *handle)
 }
 void CALLBACK LiveDeviceCapture::OnPacket(void *data, BOOLEAN didTimeout)
 {
-    //assert(!didTimeout);
+    // assert(!didTimeout);
     uv_async_t *async = (uv_async_t *)data;
     int r = uv_async_send(async);
-    //assert(r == 0);
+    // assert(r == 0);
 }
 void LiveDeviceCapture::cb_close(uv_handle_t *handle)
 {
@@ -96,17 +106,6 @@ void LiveDeviceCapture::cb_packets(uv_poll_t *handle, int status, int events)
     {
         obj->handling_packets = true;
 
-        // packet_count = pcap_dispatch(obj->pcap_handle,
-        //                              1,
-        //                              LiveDeviceCapture::EmitPacket,
-        //                              (u_char *)obj);
-        // printf("%d \n", packet_count);
-        // struct pcap_pkthdr *header;
-        // const u_char *pkt_data;
-
-        // pcap_next_ex(obj->pcap_handle, &header, &pkt_data);
-
-        // printf("%d %d \n", status, header->caplen);
         do
         {
             packet_count = pcap_dispatch(obj->pcap_handle,
@@ -133,7 +132,7 @@ void LiveDeviceCapture::EmitPacket(u_char *user,
 
     auto callback = [](Napi::Env env, Napi::Function jsCallback, PacketEventData *data)
     {
-        //printf("%d \n", data->copy_len);
+        // printf("%d \n", data->copy_len);
         jsCallback.Call({Napi::String::New(env, "data"),
                          Napi::Buffer<uint8_t>::Copy(env, data->pkt_data, data->copy_len)});
     };
@@ -158,13 +157,13 @@ void LiveDeviceCapture::Start(const Napi::CallbackInfo &info)
             // nativeThread.join();
         });
     ;
-
+    
     char errbuf[PCAP_ERRBUF_SIZE];
-    this->pcap_handle = pcap_open_live(this->network.c_str(), // name of the device
-                                       65535,                 // portion of the packet to capture.
-                                       1,                     // promiscuous mode (nonzero means promiscuous)
-                                       1000,                  // read timeout
-                                       errbuf                 // error buffer
+    this->pcap_handle = pcap_open_live(this->iface.c_str(), // name of the device
+                                       65535,               // portion of the packet to capture.
+                                       1,                   // promiscuous mode (nonzero means promiscuous)
+                                       1000,                // read timeout
+                                       errbuf               // error buffer
     );
 
     // if (pcap_set_buffer_size(this->pcap_handle, 10485760) != 0)
@@ -172,14 +171,13 @@ void LiveDeviceCapture::Start(const Napi::CallbackInfo &info)
     //     Napi::TypeError::New(env, "Unable to set buffer size").ThrowAsJavaScriptException();
     //     return;
     // }
-
+    
     if (pcap_setnonblock(this->pcap_handle, 1, errbuf) == -1)
     {
         Napi::TypeError::New(env, errbuf).ThrowAsJavaScriptException();
         return;
     }
-        
-
+    
     if (this->pcap_handle == NULL)
     {
         Napi::TypeError::New(env, errbuf).ThrowAsJavaScriptException();
@@ -187,13 +185,13 @@ void LiveDeviceCapture::Start(const Napi::CallbackInfo &info)
     }
 
     int r;
-
+    
 #ifdef _WIN32
     // uv_async_init
     r = uv_async_init(uv_default_loop(),
                       &this->async,
                       (uv_async_cb)LiveDeviceCapture::cb_packets);
-    //assert(r == 0);
+    // assert(r == 0);
     this->async.data = this;
     r = RegisterWaitForSingleObject(
         &this->wait,
@@ -223,6 +221,31 @@ void LiveDeviceCapture::Start(const Napi::CallbackInfo &info)
     r = uv_poll_start(&this->poll_handle, UV_READABLE, LiveDeviceCapture::cb_packets);
     this->poll_handle.data = this;
 #endif
+
+    if (!this->filter.empty())
+    {
+        bpf_u_int32 NetMask = 0xffffff;
+
+        // compile the filter
+        if (pcap_compile(this->pcap_handle, &this->fcode, this->filter.c_str(), 1, NetMask) < 0)
+        {
+            Napi::TypeError::New(env, "Error compiling filter: wrong syntax.")
+                .ThrowAsJavaScriptException();
+            pcap_freecode(&this->fcode);
+            pcap_close(this->pcap_handle);
+            return;
+        }
+
+        // set the filter
+        if (pcap_setfilter(this->pcap_handle, &this->fcode) < 0)
+        {
+            Napi::TypeError::New(env, "Error setting the filter")
+                .ThrowAsJavaScriptException();
+            pcap_freecode(&this->fcode);
+            pcap_close(this->pcap_handle);
+            return;
+        }
+    }
 }
 
 void LiveDeviceCapture::Stop(const Napi::CallbackInfo &info)
@@ -292,6 +315,8 @@ void LiveDeviceCapture::SetFilter(const Napi::CallbackInfo &info)
     }
 
     pcap_freecode(&this->fcode);
+
+    this->filter = filter;
 }
 
 void LiveDeviceCapture::SendPacket(const Napi::CallbackInfo &info)
@@ -347,4 +372,9 @@ bool LiveDeviceCapture::close()
 
 void LiveDeviceCapture::cleanup()
 {
+#ifdef _WIN32
+    this->wait = nullptr;
+#endif
+    this->handling_packets = false;
+    this->closing = true;
 }

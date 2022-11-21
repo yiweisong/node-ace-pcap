@@ -1,10 +1,20 @@
 # Node Aceinna PCap
 
-This is a native addon to parse network packet
+This is a native addon to capture packet from a specifed network. Some code is referenced from https://github.com/mscdex/cap.git
 
 > You need to have Node 10.5.0 or later installed.
 
-## JS what's the interface
+## How to use
+
+### Install 
+```
+npm install node-ace-pcap
+```
+
+### Sample Code
+```
+
+```
 
 const capture = new EthernetPacketCapture(options)
 capture.open()

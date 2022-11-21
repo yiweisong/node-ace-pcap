@@ -2,7 +2,8 @@
   "name": "ace-pcap",
   "version": "1.0.0",
   "description": "This is a native addon to parse network packet",
-  "main": "index.js",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "directories": {
     "lib": "lib",
     "test": "test"
@@ -10,6 +11,7 @@
   "scripts": {
     "build": "rm -rf dist && tsc -p tsconfig-build.json",
     "install": "node-gyp-build",
+    "prebuildify": "prebuildify --napi --target 14.0.0 --force --strip --verbose",
     "rebuild": "node-gyp rebuild"
   },
   "author": "",
@@ -22,6 +24,7 @@
   },
   "devDependencies": {
     "@types/node": "^18.11.9",
-    "node-gyp": "^9.3.0"
+    "node-gyp": "^9.3.0",
+    "prebuildify": "^5.0.1"
   }
 }
