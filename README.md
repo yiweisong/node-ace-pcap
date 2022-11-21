@@ -1,80 +1,67 @@
 # Node Aceinna PCap
 
-This is a native addon to capture packet from a specifed network. Some code is referenced from https://github.com/mscdex/cap.git
+This is a node-addon-api native addon to capture packet from a specifed network. Some code is referenced from https://github.com/mscdex/cap.git
 
 > You need to have Node 10.5.0 or later installed.
 
 ## How to use
 
-### Install 
+### Install
+
 ```
 npm install node-ace-pcap
 ```
 
 ### Sample Code
+
+> Basic
+
+```Javascript
+import { EthernetPacketCapture, GetNetworkInterface } from 'ace-pcap'
+const ip = '192.168.22.140'; // IP Address of network for capture packet
+const iface = GetNetworkInterface(ip);
+const instance = new EthernetPacketCapture({ iface });
+
+instance.on('data', (data) => {
+    console.log(data);
+})
+
+instance.start();
 ```
 
+> Filter
+
+```Javascript
+import { EthernetPacketCapture, GetNetworkInterface } from 'ace-pcap'
+const ip = '192.168.22.140'; // IP Address of network for capture packet
+const filter = `ether src 88:e9:fe:52:68:56`;
+const iface = GetNetworkInterface(ip);
+const instance = new EthernetPacketCapture({ iface, filter });
+
+instance.on('data', (data) => {
+  console.log(data);
+})
+
+instance.start();
+
+// update filter while capturing
+setTimeout(()=>{
+  instance.setFilter('ether src 98:5f:d3:3c:ab:fd');
+},5000)
 ```
 
-const capture = new EthernetPacketCapture(options)
-capture.open()
-capture.close()
-capture.destory()
+> Send packet to network
 
-capture.setFilter('xxx')
-capture.getFilter()
+```Javascript
+import { EthernetPacketCapture, GetNetworkInterface } from 'ace-pcap'
+const ip = '192.168.22.140'; // IP Address of network for capture packet
+const iface = GetNetworkInterface(ip);
+const instance = new EthernetPacketCapture({ iface });
 
-capture.on('data',(packet)=>{})
-capture.on('close',(packet)=>{})
-capture.on('data',(packet)=>{})
+instance.start();
 
-question
-
-1. work as stream.duplex?
-
-## C++ How to implement
-
-EthernetPacketCapure
-construtor()
-pcap_init
-
-Open()
-pcap_open_live
-
-Close()
-pcap_close
-
-Read()
-pcap_loop
-or
-pcap_next_ex
-
-Write()
-pcap_sendpacket
-
-SetFilter()
-pcap_setfilter
-
-## usage
-
-```typescript
-const ethernetPort: EthernetPort = EthernetPortFactory.create({
-  interface: "en0",
-  port: "device mac address",
-});
-ethernetPort.on("data", xxx);
-ethernetPort.open();
-ethernetPort.close();
-
-const capture = new EthernetCapture();
-ethernetPort.bind(capture);
-capture.on("data", (src, dst, data) => {
-  if (src == "deviceMac" || dst === "deviceMac") {
-    this.ports["deviceMac"].emit("data", data);
-  }
-});
-```
-
-```Cpp
-class EthernetPacketCapure
+// update filter while capturing
+setTimeout(()=>{
+  instance.send(Buffer.from('data to send'))
+},5000)
 ```

@@ -157,8 +157,9 @@ void LiveDeviceCapture::Start(const Napi::CallbackInfo &info)
             // nativeThread.join();
         });
     ;
-    
-    char errbuf[PCAP_ERRBUF_SIZE];
+
+    char errbuf[PCAP_ERRBUF_SIZE] = "";
+    // printf("%s", errbuf);
     this->pcap_handle = pcap_open_live(this->iface.c_str(), // name of the device
                                        65535,               // portion of the packet to capture.
                                        1,                   // promiscuous mode (nonzero means promiscuous)
@@ -171,13 +172,18 @@ void LiveDeviceCapture::Start(const Napi::CallbackInfo &info)
     //     Napi::TypeError::New(env, "Unable to set buffer size").ThrowAsJavaScriptException();
     //     return;
     // }
-    
+    if (strlen(errbuf) != 0)
+    {
+        Napi::TypeError::New(env, errbuf).ThrowAsJavaScriptException();
+        return;
+    }
+
     if (pcap_setnonblock(this->pcap_handle, 1, errbuf) == -1)
     {
         Napi::TypeError::New(env, errbuf).ThrowAsJavaScriptException();
         return;
     }
-    
+
     if (this->pcap_handle == NULL)
     {
         Napi::TypeError::New(env, errbuf).ThrowAsJavaScriptException();
@@ -185,7 +191,7 @@ void LiveDeviceCapture::Start(const Napi::CallbackInfo &info)
     }
 
     int r;
-    
+
 #ifdef _WIN32
     // uv_async_init
     r = uv_async_init(uv_default_loop(),
@@ -280,18 +286,21 @@ void LiveDeviceCapture::SetFilter(const Napi::CallbackInfo &info)
         return;
     }
 
-    if (this->pcap_handle == NULL)
-        return;
+    std::string filter = info[0].As<Napi::String>().Utf8Value();
 
+    this->filter = filter;
+
+    if (this->pcap_handle == NULL)
+    {    
+        return;
+    }
+    
 #ifdef _WIN32
 
 #else
     uv_poll_stop(&this->poll_handle);
     uv_poll_start(&this->poll_handle, UV_READABLE, LiveDeviceCapture::cb_packets);
 #endif
-
-    std::string filter = info[0].As<Napi::String>().Utf8Value();
-
     bpf_u_int32 NetMask = 0xffffff;
 
     // compile the filter
@@ -315,8 +324,6 @@ void LiveDeviceCapture::SetFilter(const Napi::CallbackInfo &info)
     }
 
     pcap_freecode(&this->fcode);
-
-    this->filter = filter;
 }
 
 void LiveDeviceCapture::SendPacket(const Napi::CallbackInfo &info)
