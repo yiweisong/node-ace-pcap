@@ -9,7 +9,7 @@ This is a node-addon-api native addon to capture packet from a specifed network.
 ### Install
 
 ```
-npm install node-ace-pcap
+npm install ace-pcap
 ```
 
 ### Sample Code

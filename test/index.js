@@ -42,6 +42,11 @@ setTimeout(() => {
     instance.send(command1);
 }, 5 * 1000);
 
+setTimeout(() => {
+    instance.setFilter('');
+}, 15 * 1000);
+
+
 // setTimeout(() => {
 //     instance.setFilter(`ether src ${hostMAC}`)
 //     const command2 = buildETHCommand(
