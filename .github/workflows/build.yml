@@ -50,8 +50,6 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 16.x
-      - run: sudo apt-get install libcap-dev
-      - run: npm ci
       - run: npm run build
       - run: npm run semantic-release
         env:
