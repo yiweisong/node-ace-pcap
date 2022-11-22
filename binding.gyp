@@ -57,6 +57,9 @@
           ],
           ['OS!="win"',
             {
+              'include_dirs': [
+                  '/usr/local/include',
+              ],
               # POSIX
               'link_settings': {
                   'libraries': ['-lpcap'],
