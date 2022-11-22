@@ -21,11 +21,11 @@
               'conditions': [
                   ['target_arch=="ia32"', {
                       'link_settings': {
-                          'libraries': ['<(PRODUCT_DIR)/../../deps/Lib/wpcap.lib'],
+                          'libraries': ['ws2_32.lib', '<(PRODUCT_DIR)/../../deps/Lib/wpcap.lib'],
                       },
                   }, {
                       'link_settings': {
-                          'libraries': ['<(PRODUCT_DIR)/../../deps/Lib/x64/wpcap.lib'],
+                          'libraries': ['ws2_32.lib', '<(PRODUCT_DIR)/../../deps/Lib/x64/wpcap.lib'],
                       },
                   }],
               ],
