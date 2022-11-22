@@ -221,7 +221,7 @@ void LiveDeviceCapture::Start(const Napi::CallbackInfo &info)
 #else
     this->fd = pcap_get_selectable_fd(this->pcap_handle);
     r = uv_poll_init(uv_default_loop(), &this->poll_handle, this->fd);
-    assert(r == 0);
+    // assert(r == 0);
     r = uv_poll_start(&this->poll_handle, UV_READABLE, LiveDeviceCapture::cb_packets);
     this->poll_handle.data = this;
 #endif
