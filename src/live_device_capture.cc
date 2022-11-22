@@ -1,6 +1,4 @@
 #include "live_device_capture.h"
-// #include <thread>
-// #include <chrono>
 
 using namespace Napi;
 
