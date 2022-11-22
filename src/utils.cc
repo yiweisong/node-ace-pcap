@@ -1,5 +1,12 @@
 #include "utils.h"
 
+#ifdef _MSC_VER
+# include "windows_polyfills.h"
+#else
+# include <arpa/inet.h>
+# include <sys/ioctl.h>
+#endif
+
 using namespace Napi;
 
 Napi::String GetNetworkInterface(const Napi::CallbackInfo &info)
