@@ -13,3 +13,10 @@ npm-debug.log*
 
 */*.bin
 test/
+build/
+lib/*
+.releaserc
+.yarnrc
+*.md
+tsconfig-build.json
+tsconfig.json
