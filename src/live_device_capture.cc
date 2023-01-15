@@ -140,6 +140,15 @@ void LiveDeviceCapture::EmitPacket(u_char *user,
 
 void LiveDeviceCapture::Start(const Napi::CallbackInfo &info)
 {
+#ifdef _WIN32
+	/* Load Npcap and its functions. */
+	if (!LoadNpcapDlls())
+	{
+		fprintf(stderr, "Couldn't load Npcap\n");
+		exit(1);
+	}
+#endif
+
     Napi::Env env = info.Env();
 
     Napi::Function emit = info.This().As<Napi::Object>().Get("emit").As<Napi::Function>();
@@ -161,7 +170,7 @@ void LiveDeviceCapture::Start(const Napi::CallbackInfo &info)
     this->pcap_handle = pcap_open_live(this->iface.c_str(), // name of the device
                                        65535,               // portion of the packet to capture.
                                        1,                   // promiscuous mode (nonzero means promiscuous)
-                                       1000,                // read timeout
+                                       100,                // read timeout
                                        errbuf               // error buffer
     );
 

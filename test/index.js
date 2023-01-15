@@ -7,16 +7,19 @@ const MIN_ETH_COMMAND_LENGTH = 46;
 
 const hostMAC = '88:e9:fe:52:68:56'; //98:5f:d3:3c:ab:fd
 
-const ip = '192.168.22.140'; //local ip
+const destMAC = '01:00:5e:7f:ff:fc';
+
+const ip = '192.168.22.89'; //local ip
 
 const iface = GetNetworkInterface(ip);
 
-const filter = `ether src ${hostMAC}`;
+const filter = `ether dst ${destMAC}`;
 
 const instance = new EthernetPacketCapture({ iface, filter });
 
+let recordCount = 0;
 instance.on('data', (data) => {
-    console.log(data);
+    console.log(recordCount++);
 })
 
 instance.start();
@@ -25,26 +28,26 @@ instance.start();
 
 //instance.setFilter(`(ether src ${hostMAC} or ether dst ${hostMAC})`)
 
-const command = buildETHCommand(
-    "ff:ff:ff:ff:ff:ff",
-    hostMAC,
-    [0x01, 0xcc]
-)
-instance.send(command);
+// const command = buildETHCommand(
+//     "ff:ff:ff:ff:ff:ff",
+//     hostMAC,
+//     [0x01, 0xcc]
+// )
+// instance.send(command);
 
-setTimeout(() => {
-    instance.setFilter(`ether dst ${hostMAC}`)
-    const command1 = buildETHCommand(
-        hostMAC,
-        "ff:ff:ff:ff:ff:ff",
-        [0x01, 0xcc]
-    )
-    instance.send(command1);
-}, 5 * 1000);
+// setTimeout(() => {
+//     instance.setFilter(`ether dst ${hostMAC}`)
+//     const command1 = buildETHCommand(
+//         hostMAC,
+//         "ff:ff:ff:ff:ff:ff",
+//         [0x01, 0xcc]
+//     )
+//     instance.send(command1);
+// }, 5 * 1000);
 
-setTimeout(() => {
-    instance.setFilter('');
-}, 15 * 1000);
+// setTimeout(() => {
+//     instance.setFilter('');
+// }, 15 * 1000);
 
 
 // setTimeout(() => {
