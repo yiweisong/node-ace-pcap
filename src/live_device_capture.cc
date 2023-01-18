@@ -2,26 +2,6 @@
 
 using namespace Napi;
 
-#ifdef _WIN32
-#include <stdio.h>
-#include <tchar.h>
-BOOL LoadNpcapDlls()
-{
-	_TCHAR npcap_dir[512];
-	UINT len;
-	len = GetSystemDirectory(npcap_dir, 480);
-	if (!len) {
-		fprintf(stderr, "Error in GetSystemDirectory: %x", GetLastError());
-		return FALSE;
-	}
-	_tcscat_s(npcap_dir, 512, _T("\\Npcap"));
-	if (SetDllDirectory(npcap_dir) == 0) {
-		fprintf(stderr, "Error in SetDllDirectory: %x", GetLastError());
-		return FALSE;
-	}
-	return TRUE;
-}
-#endif
 
 Napi::Object LiveDeviceCapture::Init(Napi::Env env, Napi::Object exports)
 {
@@ -161,15 +141,6 @@ void LiveDeviceCapture::EmitPacket(u_char *user,
 
 void LiveDeviceCapture::Start(const Napi::CallbackInfo &info)
 {
-#ifdef _WIN32
-	/* Load Npcap and its functions. */
-	if (!LoadNpcapDlls())
-	{
-		fprintf(stderr, "Couldn't load Npcap\n");
-		exit(1);
-	}
-#endif
-
     Napi::Env env = info.Env();
 
     Napi::Function emit = info.This().As<Napi::Object>().Get("emit").As<Napi::Function>();
