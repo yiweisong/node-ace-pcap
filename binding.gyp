@@ -31,6 +31,9 @@
               ],
               'msvs_settings': {
                 'VCCLCompilerTool': { 'ExceptionHandling': 1 },
+                'VCLinkerTool':{
+                  'DelayLoadDLLs':['wpcap.dll']
+                }
               }
             }
           ],
