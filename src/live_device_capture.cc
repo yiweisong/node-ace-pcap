@@ -177,12 +177,6 @@ void LiveDeviceCapture::Start(const Napi::CallbackInfo &info)
         return;
     }
 
-    if (pcap_setnonblock(this->pcap_handle, 1, errbuf) == -1)
-    {
-        Napi::TypeError::New(env, errbuf).ThrowAsJavaScriptException();
-        return;
-    }
-
     if (this->pcap_handle == NULL)
     {
         Napi::TypeError::New(env, errbuf).ThrowAsJavaScriptException();
@@ -192,6 +186,14 @@ void LiveDeviceCapture::Start(const Napi::CallbackInfo &info)
     int r;
 
 #ifdef _WIN32
+    if (pcap_setnonblock(this->pcap_handle, 1, errbuf) == -1)
+    {
+        Napi::TypeError::New(env, errbuf).ThrowAsJavaScriptException();
+        return;
+    }
+
+    pcap_setmintocopy(this->pcap_handle, 0);
+
     // uv_async_init
     r = uv_async_init(uv_default_loop(),
                       &this->async,
