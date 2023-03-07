@@ -160,9 +160,9 @@ void LiveDeviceCapture::Start(const Napi::CallbackInfo &info)
     char errbuf[PCAP_ERRBUF_SIZE] = "";
     // printf("%s", errbuf);
     this->pcap_handle = pcap_open_live(this->iface.c_str(), // name of the device
-                                       65535,               // portion of the packet to capture.
+                                       262144,               // portion of the packet to capture.
                                        1,                   // promiscuous mode (nonzero means promiscuous)
-                                       100,                // read timeout
+                                       250,                // read timeout
                                        errbuf               // error buffer
     );
 
