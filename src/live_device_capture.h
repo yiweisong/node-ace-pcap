@@ -8,7 +8,7 @@
 
 struct PacketEventData
 {
-    const u_char *pkt_data;
+    u_char *pkt_data;
     size_t copy_len;
 };
 

@@ -126,14 +126,17 @@ void LiveDeviceCapture::EmitPacket(u_char *user,
     LiveDeviceCapture *obj = (LiveDeviceCapture *)user;
 
     PacketEventData *eventData = new PacketEventData;
-    eventData->pkt_data = pkt_data;
+    eventData->pkt_data = new u_char[pkt_hdr->caplen];
     eventData->copy_len = pkt_hdr->caplen;
+    memcpy(eventData->pkt_data, pkt_data, pkt_hdr->caplen);
 
     auto callback = [](Napi::Env env, Napi::Function jsCallback, PacketEventData *data)
     {
         // printf("%d \n", data->copy_len);
         jsCallback.Call({Napi::String::New(env, "data"),
                          Napi::Buffer<uint8_t>::Copy(env, data->pkt_data, data->copy_len)});
+        delete data->pkt_data;                        
+        delete data;
     };
 
     obj->tsEmit_.BlockingCall(eventData, callback);

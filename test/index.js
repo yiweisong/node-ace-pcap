@@ -7,15 +7,15 @@ const MIN_ETH_COMMAND_LENGTH = 46;
 
 const hostMAC = '88:e9:fe:52:68:56'; //98:5f:d3:3c:ab:fd
 
-const destMAC = '01:00:5e:7f:ff:fc';
+const destMAC = 'bd:b6:aa:83:00:28';
 
-const ip = '192.168.10.5'; //local ip
+const ip = '169.254.148.199'; //local ip
 
 const iface = GetNetworkInterface(ip);
 
-const filter = `ether dst ${destMAC}`;
+const filter = `ether src ${destMAC}`;
 
-const instance = new EthernetPacketCapture({ iface });
+const instance = new EthernetPacketCapture({ iface ,filter});
 
 let recordCount = 0;
 instance.on('data', (data) => {
