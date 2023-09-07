@@ -40,4 +40,8 @@ export class EthernetPacketCapture extends EventEmitter {
 
 export const GetNetworkInterface = function (ip: string) {
   return binding.GetNetworkInterface(ip);
-} 
+}
+
+export const IsDependencyInstalled = function () {
+  return binding.IsDependencyInstalled();
+}

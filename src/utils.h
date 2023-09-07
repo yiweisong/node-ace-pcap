@@ -7,5 +7,6 @@
 #include <pcap.h>
 
 Napi::String GetNetworkInterface(const Napi::CallbackInfo &);
+Napi::Boolean IsDependencyInstalled(const Napi::CallbackInfo &);
 
 #endif
