@@ -1,4 +1,4 @@
-const { EthernetPacketCapture, GetNetworkInterface, IsDependencyInstalled } = require('../dist/index');
+const { EthernetPacketCapture, GetNetworkInterface, Prepare } = require('../dist/index');
 const { struct } = require('./struct');
 
 const HEADER = [0x55, 0x55];
@@ -15,7 +15,7 @@ const iface = GetNetworkInterface(ip);
 
 const filter = `ether src ${destMAC}`;
 
-console.log('Is npcap installed?', IsDependencyInstalled());
+console.log('Is npcap installed?', Prepare());
 
 const instance = new EthernetPacketCapture({ iface, filter });
 

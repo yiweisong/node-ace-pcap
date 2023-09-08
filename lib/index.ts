@@ -42,6 +42,6 @@ export const GetNetworkInterface = function (ip: string) {
   return binding.GetNetworkInterface(ip);
 }
 
-export const IsDependencyInstalled = function () {
-  return binding.IsDependencyInstalled();
+export const Prepare = function () {
+  return binding.Prepare();
 }

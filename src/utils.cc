@@ -3,7 +3,21 @@
 #ifdef _WIN32
 #include <stdio.h>
 #include <tchar.h>
-BOOL LoadNpcapDlls()
+#include <libloaderapi.h>
+BOOL IsNpcapLoaded()
+{
+    HMODULE hNpcap = LoadLibraryExA("Packet.dll", NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
+    if (hNpcap == NULL)
+    {
+        return FALSE;
+    }
+    else
+    {
+        FreeLibrary(hNpcap);
+        return TRUE;
+    }
+}
+BOOL SetWorkDirectoryForNpcapDlls()
 {
 	_TCHAR npcap_dir[512];
 	UINT len;
@@ -23,17 +37,24 @@ BOOL LoadNpcapDlls()
 
 using namespace Napi;
 
-Napi::Boolean IsDependencyInstalled(const Napi::CallbackInfo &info)
+Napi::Boolean Prepare(const Napi::CallbackInfo &info)
 {
 #ifdef _WIN32
+    // check if Npcap is installed
+    if (!IsNpcapLoaded())
+    {
+        fprintf(stderr, "Npcap is not installed.\n");
+        return Napi::Boolean::New(info.Env(), false);
+    }
+
 	/* Load Npcap and its functions. */
-	if (!LoadNpcapDlls())
+	if (!SetWorkDirectoryForNpcapDlls())
 	{
 		fprintf(stderr, "Couldn't load Npcap\n");
-		
         return Napi::Boolean::New(info.Env(), false);
 	}
 #endif
+
     return Napi::Boolean::New(info.Env(), true);
 }
 

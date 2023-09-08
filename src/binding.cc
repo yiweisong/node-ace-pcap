@@ -7,7 +7,7 @@ Napi::Object Init(Napi::Env env, Napi::Object exports)
   Napi::HandleScope scope(env);
   LiveDeviceCapture::Init(env, exports);
   exports.Set("GetNetworkInterface", Napi::Function::New(env, GetNetworkInterface));
-  exports.Set("IsDependencyInstalled", Napi::Function::New(env, IsDependencyInstalled));
+  exports.Set("Prepare", Napi::Function::New(env, Prepare));
   return exports;
 }
 
