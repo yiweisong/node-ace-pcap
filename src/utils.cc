@@ -6,7 +6,7 @@
 #include <libloaderapi.h>
 BOOL IsNpcapLoaded()
 {
-    HMODULE hNpcap = LoadLibraryExA("Packet.dll", NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
+    HMODULE hNpcap = LoadLibraryExA(".\\Npcap\\Packet.dll", NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
     if (hNpcap == NULL)
     {
         return FALSE;
@@ -43,14 +43,14 @@ Napi::Boolean Prepare(const Napi::CallbackInfo &info)
     // check if Npcap is installed
     if (!IsNpcapLoaded())
     {
-        fprintf(stderr, "Npcap is not installed.\n");
+        //fprintf(stderr, "Npcap is not installed.\n");
         return Napi::Boolean::New(info.Env(), false);
     }
 
 	/* Load Npcap and its functions. */
 	if (!SetWorkDirectoryForNpcapDlls())
 	{
-		fprintf(stderr, "Couldn't load Npcap\n");
+		//fprintf(stderr, "Couldn't load Npcap\n");
         return Napi::Boolean::New(info.Env(), false);
 	}
 #endif

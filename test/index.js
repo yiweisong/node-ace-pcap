@@ -1,6 +1,12 @@
 const { EthernetPacketCapture, GetNetworkInterface, Prepare } = require('../dist/index');
 const { struct } = require('./struct');
 
+if (!Prepare()) {
+    console.log('npcap is not installed, please install it first');
+} else {
+    console.log('npcap is installed');
+}
+
 const HEADER = [0x55, 0x55];
 
 const MIN_ETH_COMMAND_LENGTH = 46;
@@ -9,13 +15,11 @@ const hostMAC = '88:e9:fe:52:68:56'; //98:5f:d3:3c:ab:fd
 
 const destMAC = 'bd:b6:aa:83:00:28';
 
-const ip = '169.254.148.199'; //local ip
+const ip = '192.168.22.148'; //local ip
 
 const iface = GetNetworkInterface(ip);
 
-const filter = `ether src ${destMAC}`;
-
-console.log('Is npcap installed?', Prepare());
+const filter = ''; //`ether src ${destMAC}`;
 
 const instance = new EthernetPacketCapture({ iface, filter });
 
